@@ -26,10 +26,8 @@ function getCommits(repoPath, since, until) {
       { encoding: 'utf-8', timeout: 10000 }
     );
     if (!output.trim()) return [];
-    return output.trim().split('\n').map(line => {
-      const [message, author] = line.split('\t');
-      return { message, author };
-    });
+    return output.trim().split('\n').map(line => { const idx = line.indexOf('\t'); if (idx === -1) return { message: line, author: '' }; return { message: line.slice(0, idx), author: line.slice(idx + 1) };
+ });
   } catch (error) {
     console.error('Error fetching commits:', error.message);
     throw error;
@@ -72,5 +70,10 @@ app.post('/api/standup', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+ const PORT = process.env.PORT || 3000;
+ const server = app.listen(PORT, () => { console.log(Server running at http://localhost:${PORT});
+ });
+ server.on('error', (err) => { if (err.code === 'EADDRINUSE') {
+  console.error(Port ${PORT} is already in use. Exiting.);
+  process.exit(1); } console.error('Server error:', err); process.exit(1);
+ });
